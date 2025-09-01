@@ -17,23 +17,23 @@ import { formatPrice } from '../data/itineraryData'
 
 const getActivityIcon = (type) => {
   const icons = {
-    transport: <Train className="w-4 h-4" />,
-    flight: <Plane className="w-4 h-4" />,
-    attraction: <Ticket className="w-4 h-4" />,
-    food: <Utensils className="w-4 h-4" />,
-    culture: <Building2 className="w-4 h-4" />,
-    nature: <TreePine className="w-4 h-4" />,
-    photo: <Camera className="w-4 h-4" />,
-    sightseeing: <MapPin className="w-4 h-4" />,
-    start: <Clock className="w-4 h-4" />,
-    stay: <Building2 className="w-4 h-4" />,
-    shopping: <Building2 className="w-4 h-4" />,
-    ride: <Ticket className="w-4 h-4" />,
-    show: <Camera className="w-4 h-4" />,
-    arrival: <Plane className="w-4 h-4" />,
-    departure: <Plane className="w-4 h-4" />
+    transport: <Train className="w-3 h-3 sm:w-4 sm:h-4" />,
+    flight: <Plane className="w-3 h-3 sm:w-4 sm:h-4" />,
+    attraction: <Ticket className="w-3 h-3 sm:w-4 sm:h-4" />,
+    food: <Utensils className="w-3 h-3 sm:w-4 sm:h-4" />,
+    culture: <Building2 className="w-3 h-3 sm:w-4 sm:h-4" />,
+    nature: <TreePine className="w-3 h-3 sm:w-4 sm:h-4" />,
+    photo: <Camera className="w-3 h-3 sm:w-4 sm:h-4" />,
+    sightseeing: <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />,
+    start: <Clock className="w-3 h-3 sm:w-4 sm:h-4" />,
+    stay: <Building2 className="w-3 h-3 sm:w-4 sm:h-4" />,
+    shopping: <Building2 className="w-3 h-3 sm:w-4 sm:h-4" />,
+    ride: <Ticket className="w-3 h-3 sm:w-4 sm:h-4" />,
+    show: <Camera className="w-3 h-3 sm:w-4 sm:h-4" />,
+    arrival: <Plane className="w-3 h-3 sm:w-4 sm:h-4" />,
+    departure: <Plane className="w-3 h-3 sm:w-4 sm:h-4" />
   }
-  return icons[type] || <Clock className="w-4 h-4" />
+  return icons[type] || <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
 }
 
 const getActivityColor = (type) => {
@@ -79,7 +79,7 @@ const ActivityList = ({ activities, currency }) => {
 
   return (
     <motion.div 
-      className="space-y-3"
+      className="space-y-2 sm:space-y-3"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -90,31 +90,42 @@ const ActivityList = ({ activities, currency }) => {
           variants={itemVariants}
           className="group relative"
         >
-          <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-white transition-all duration-300">
-            {/* Time badge */}
-            <div className="flex-shrink-0">
-              <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-slate-200 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-slate-50 rounded-lg sm:rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-white transition-all duration-300">
+            {/* Mobile: Time and type badges in row */}
+            <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3">
+              {/* Time badge */}
+              <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 bg-white rounded-md sm:rounded-lg border border-slate-200 shadow-sm">
                 <Clock className="w-3 h-3 text-slate-500" />
-                <span className="text-sm font-medium text-slate-700">{activity.time}</span>
+                <span className="text-xs sm:text-sm font-medium text-slate-700">{activity.time}</span>
               </div>
+
+              {/* Type badge */}
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border ${getActivityColor(activity.type)}`}>
+                {getActivityIcon(activity.type)}
+                <span className="capitalize hidden sm:inline">{activity.type}</span>
+              </div>
+
+              {/* Cost on mobile */}
+              {activity.cost > 0 && (
+                <div className="flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200 sm:hidden">
+                  <DollarSign className="w-3 h-3" />
+                  <span className="text-xs font-semibold">
+                    {formatPrice(activity.cost, 'JPY', currency)}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Activity content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3 flex-1">
-                  <div className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border ${getActivityColor(activity.type)}`}>
-                    {getActivityIcon(activity.type)}
-                    <span className="capitalize">{activity.type}</span>
-                  </div>
-                  <p className="text-slate-700 font-medium leading-relaxed">
-                    {activity.activity}
-                  </p>
-                </div>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
+                <p className="text-sm sm:text-base text-slate-700 font-medium leading-relaxed">
+                  {activity.activity}
+                </p>
                 
-                {/* Cost */}
+                {/* Cost on desktop */}
                 {activity.cost > 0 && (
-                  <div className="flex-shrink-0">
+                  <div className="hidden sm:flex flex-shrink-0">
                     <div className="flex items-center gap-1 px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200">
                       <DollarSign className="w-3 h-3" />
                       <span className="text-sm font-semibold">
@@ -128,9 +139,9 @@ const ActivityList = ({ activities, currency }) => {
             </div>
           </div>
           
-          {/* Connector line */}
+          {/* Connector line - hidden on mobile */}
           {idx < activities.length - 1 && (
-            <div className="ml-10 w-px h-4 bg-gradient-to-b from-slate-300 to-transparent" />
+            <div className="hidden sm:block ml-10 w-px h-4 bg-gradient-to-b from-slate-300 to-transparent" />
           )}
         </motion.div>
       ))}

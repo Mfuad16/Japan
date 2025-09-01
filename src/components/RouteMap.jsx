@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { MapPin, ArrowRight, Clock, Star } from 'lucide-react'
+import { MapPin, ArrowRight, Clock, Star, Train, Car } from 'lucide-react'
 
 const RouteMap = () => {
   const routes = [
@@ -10,7 +10,8 @@ const RouteMap = () => {
       transport: 'Private Car',
       duration: '2.5 hours',
       highlights: ['Scenic Drive', 'Mountain Views'],
-      color: 'from-pink-500 to-orange-500'
+      color: 'from-pink-500 to-orange-500',
+      icon: Car
     },
     {
       from: 'Tokyo',
@@ -18,7 +19,8 @@ const RouteMap = () => {
       transport: 'Shinkansen',
       duration: '2.5 hours',
       highlights: ['Bullet Train', 'Speed 320km/h'],
-      color: 'from-yellow-500 to-amber-500'
+      color: 'from-yellow-500 to-amber-500',
+      icon: Train
     },
     {
       from: 'Osaka',
@@ -26,7 +28,8 @@ const RouteMap = () => {
       transport: 'Local Train',
       duration: '1 hour',
       highlights: ['Keihan Line', 'Local Experience'],
-      color: 'from-emerald-500 to-green-500'
+      color: 'from-emerald-500 to-green-500',
+      icon: Train
     },
     {
       from: 'Kyoto',
@@ -34,7 +37,8 @@ const RouteMap = () => {
       transport: 'Shinkansen',
       duration: '1.5 hours',
       highlights: ['Bullet Train', 'Countryside Views'],
-      color: 'from-indigo-500 to-purple-500'
+      color: 'from-indigo-500 to-purple-500',
+      icon: Train
     },
     {
       from: 'Hiroshima',
@@ -42,7 +46,8 @@ const RouteMap = () => {
       transport: 'Shinkansen',
       duration: '4 hours',
       highlights: ['Final Journey', 'Return Trip'],
-      color: 'from-purple-500 to-pink-500'
+      color: 'from-purple-500 to-pink-500',
+      icon: Train
     }
   ]
 
@@ -85,19 +90,19 @@ const RouteMap = () => {
   ]
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Interactive Map */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl p-8 border-2 border-slate-200 overflow-hidden"
-        style={{ height: '500px' }}
+        className="relative bg-gradient-to-br from-blue-50 to-indigo-100 rounded-2xl sm:rounded-3xl p-4 sm:p-8 border-2 border-slate-200 overflow-hidden"
+        style={{ height: '300px', '@media (min-width: 640px)': { height: '500px' } }}
       >
         <div className="absolute inset-0 bg-pattern opacity-30" />
         
         <div className="relative h-full">
-          <h3 className="text-2xl font-bold text-slate-800 text-center mb-8">
+          <h3 className="text-lg sm:text-2xl font-bold text-slate-800 text-center mb-4 sm:mb-8">
             🗾 Your Japan Journey Route
           </h3>
           
@@ -117,7 +122,7 @@ const RouteMap = () => {
             >
               <div className="relative">
                 <motion.div
-                  className="w-16 h-16 bg-white rounded-full shadow-lg border-4 border-blue-500 flex items-center justify-center text-2xl hover:shadow-xl transition-all duration-300"
+                  className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-full shadow-lg border-2 sm:border-4 border-blue-500 flex items-center justify-center text-lg sm:text-2xl hover:shadow-xl transition-all duration-300"
                   whileHover={{ scale: 1.1, y: -5 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -125,11 +130,11 @@ const RouteMap = () => {
                 </motion.div>
                 
                 {/* City Info Tooltip */}
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="bg-slate-800 text-white p-3 rounded-lg shadow-lg whitespace-nowrap">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                  <div className="bg-slate-800 text-white p-2 sm:p-3 rounded-lg shadow-lg whitespace-nowrap text-xs sm:text-sm">
                     <div className="font-semibold">{city.name}</div>
                     <div className="text-xs opacity-90">{city.days} day{city.days > 1 ? 's' : ''}</div>
-                    <div className="text-xs opacity-75 mt-1">{city.description}</div>
+                    <div className="text-xs opacity-75 mt-1 hidden sm:block">{city.description}</div>
                   </div>
                 </div>
               </div>
@@ -160,46 +165,50 @@ const RouteMap = () => {
       </motion.div>
 
       {/* Transportation Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {routes.map((route, index) => (
-          <motion.div
-            key={`${route.from}-${route.to}`}
-            initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 + index * 0.1, duration: 0.5 }}
-            className="bg-white rounded-xl p-6 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${route.color}`} />
-                <span className="font-semibold text-slate-800">{route.from}</span>
-                <ArrowRight className="w-4 h-4 text-slate-400" />
-                <span className="font-semibold text-slate-800">{route.to}</span>
+      <div className="grid grid-cols-1 gap-4 sm:gap-6">
+        {routes.map((route, index) => {
+          const TransportIcon = route.icon
+          return (
+            <motion.div
+              key={`${route.from}-${route.to}`}
+              initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 + index * 0.1, duration: 0.5 }}
+              className="bg-white rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${route.color}`} />
+                  <span className="font-semibold text-slate-800 text-sm sm:text-base">{route.from}</span>
+                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+                  <span className="font-semibold text-slate-800 text-sm sm:text-base">{route.to}</span>
+                </div>
+                <div className="flex items-center gap-1 text-slate-600">
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="text-xs sm:text-sm">{route.duration}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1 text-slate-600">
-                <Clock className="w-4 h-4" />
-                <span className="text-sm">{route.duration}</span>
+              
+              <div className="bg-slate-50 rounded-lg p-3 sm:p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <TransportIcon className="w-4 h-4 text-slate-600" />
+                  <span className="text-sm font-medium text-slate-700">Via {route.transport}</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {route.highlights.map((highlight, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-white text-slate-600 rounded-md border border-slate-200"
+                    >
+                      <Star className="w-3 h-3" />
+                      {highlight}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-            
-            <div className="bg-slate-50 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm font-medium text-slate-700">Via {route.transport}</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {route.highlights.map((highlight, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-white text-slate-600 rounded-md border border-slate-200"
-                  >
-                    <Star className="w-3 h-3" />
-                    {highlight}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          )
+        })}
       </div>
     </div>
   )

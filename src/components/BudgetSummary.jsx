@@ -41,9 +41,9 @@ const BudgetSummary = ({ currency }) => {
   ]
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Budget Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {budgetItems.map((item, index) => {
           const Icon = item.icon
           return (
@@ -54,23 +54,23 @@ const BudgetSummary = ({ currency }) => {
               transition={{ delay: index * 0.1, duration: 0.5 }}
               className="group"
             >
-              <div className="relative overflow-hidden bg-white rounded-2xl p-6 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300">
+              <div className="relative overflow-hidden bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300">
                 <div className={`absolute inset-0 bg-gradient-to-br ${item.color} opacity-5 group-hover:opacity-10 transition-opacity`} />
                 
                 <div className="relative">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${item.color} text-white shadow-lg`}>
-                      <Icon className="w-6 h-6" />
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br ${item.color} text-white shadow-lg`}>
+                      <Icon className="w-4 h-4 sm:w-6 sm:h-6" />
                     </div>
-                    <TrendingUp className="w-5 h-5 text-slate-400" />
+                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400" />
                   </div>
                   
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold text-slate-800">{item.label}</h3>
-                    <div className="text-3xl font-bold text-slate-900">
+                  <div className="space-y-1 sm:space-y-2">
+                    <h3 className="text-base sm:text-lg font-semibold text-slate-800">{item.label}</h3>
+                    <div className="text-2xl sm:text-3xl font-bold text-slate-900">
                       {formatPrice(item.amount, 'JPY', currency)}
                     </div>
-                    <p className="text-sm text-slate-600">{item.description}</p>
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{item.description}</p>
                   </div>
                 </div>
               </div>
@@ -84,14 +84,14 @@ const BudgetSummary = ({ currency }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.5 }}
-        className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200"
+        className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-8 shadow-lg border border-slate-200"
       >
-        <h3 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+        <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-4 sm:mb-6 flex items-center gap-3">
           <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" />
           Budget Breakdown
         </h3>
         
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {categoryBreakdown.map((category, index) => (
             <motion.div
               key={category.name}
@@ -100,11 +100,11 @@ const BudgetSummary = ({ currency }) => {
               transition={{ delay: 0.5 + index * 0.1, duration: 0.4 }}
               className="group"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-slate-700">{category.name}</span>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-slate-500">{category.percentage}%</span>
-                  <span className="font-semibold text-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                <span className="font-medium text-slate-700 text-sm sm:text-base">{category.name}</span>
+                <div className="flex items-center justify-between sm:justify-end gap-3">
+                  <span className="text-xs sm:text-sm text-slate-500">{category.percentage}%</span>
+                  <span className="font-semibold text-slate-800 text-sm sm:text-base">
                     {formatPrice(category.amount, 'JPY', currency)}
                   </span>
                 </div>
@@ -132,14 +132,14 @@ const BudgetSummary = ({ currency }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.5 }}
-        className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-2xl p-8 border border-emerald-200"
+        className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl sm:rounded-2xl p-4 sm:p-8 border border-emerald-200"
       >
-        <h3 className="text-2xl font-bold text-emerald-800 mb-6 flex items-center gap-3">
+        <h3 className="text-xl sm:text-2xl font-bold text-emerald-800 mb-4 sm:mb-6 flex items-center gap-3">
           <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-500" />
           What's Included
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4">
           {[
             'All Shinkansen bullet train tickets',
             'All attraction entrance fees & tickets',
@@ -155,10 +155,10 @@ const BudgetSummary = ({ currency }) => {
               transition={{ delay: 0.8 + index * 0.1, duration: 0.3 }}
               className="flex items-center gap-3 p-3 bg-white rounded-lg border border-emerald-200"
             >
-              <div className="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0">
                 ✓
               </div>
-              <span className="text-slate-700 font-medium">{item}</span>
+              <span className="text-slate-700 font-medium text-sm sm:text-base leading-relaxed">{item}</span>
             </motion.div>
           ))}
         </div>

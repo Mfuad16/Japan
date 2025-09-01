@@ -51,7 +51,7 @@ function App() {
       case 'itinerary':
         return (
           <motion.div 
-            className="space-y-6"
+            className="space-y-4 sm:space-y-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -79,29 +79,29 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-6xl">
         {/* Header */}
         <motion.header 
-          className="text-center mb-12"
+          className="text-center mb-6 sm:mb-12"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
           <motion.div
-            className="inline-flex items-center gap-3 mb-6"
+            className="flex flex-col sm:inline-flex sm:flex-row items-center gap-2 sm:gap-3 mb-4 sm:mb-6"
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
-            <div className="text-6xl">🗾</div>
-            <div>
-              <h1 className="text-5xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <div className="text-4xl sm:text-6xl">🗾</div>
+            <div className="text-center sm:text-left">
+              <h1 className="text-3xl sm:text-5xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
                 Japan Adventure
               </h1>
-              <p className="text-xl text-slate-600 font-medium">8-Day Cultural Journey</p>
+              <p className="text-lg sm:text-xl text-slate-600 font-medium">8-Day Cultural Journey</p>
             </div>
           </motion.div>
           <motion.p 
-            className="text-lg text-slate-700 max-w-2xl mx-auto leading-relaxed"
+            className="text-sm sm:text-lg text-slate-700 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
@@ -120,7 +120,7 @@ function App() {
 
         {/* Content */}
         <motion.main 
-          className="mt-8"
+          className="mt-6 sm:mt-8"
           key={activeTab}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -132,16 +132,16 @@ function App() {
 
         {/* Currency Toggle */}
         <motion.div 
-          className="fixed bottom-6 right-6 z-50"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 1, type: "spring", stiffness: 200 }}
         >
           <button
             onClick={() => setCurrency(prev => prev === 'JPY' ? 'INR' : 'JPY')}
-            className="bg-white shadow-lg rounded-full p-4 border border-slate-200 hover:shadow-xl transition-all duration-300 hover:scale-110"
+            className="bg-white shadow-lg rounded-full p-3 sm:p-4 border border-slate-200 hover:shadow-xl transition-all duration-300 hover:scale-110"
           >
-            <span className="text-sm font-bold text-slate-700">
+            <span className="text-xs sm:text-sm font-bold text-slate-700">
               {currency === 'JPY' ? '¥ → ₹' : '₹ → ¥'}
             </span>
           </button>

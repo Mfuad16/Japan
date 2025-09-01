@@ -47,51 +47,51 @@ const DayCard = ({ day, index, currency, isSelected, onSelect }) => {
       variants={cardVariants}
       className="group"
     >
-      <div className={`relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-200 hover:border-slate-300`}>
+      <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 border border-slate-200 hover:border-slate-300`}>
         {/* Gradient accent bar */}
-        <div className={`h-2 bg-gradient-to-r ${getColorClasses(day.color)}`} />
+        <div className={`h-1 sm:h-2 bg-gradient-to-r ${getColorClasses(day.color)}`} />
         
         {/* Header */}
         <div 
-          className="p-6 cursor-pointer"
+          className="p-4 sm:p-6 cursor-pointer"
           onClick={onSelect}
         >
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex-1">
-              <div className="flex items-center gap-4 mb-3">
-                <div className={`flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r ${getColorClasses(day.color)} text-white font-bold text-lg shadow-lg`}>
+              <div className="flex items-center gap-3 sm:gap-4 mb-3">
+                <div className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r ${getColorClasses(day.color)} text-white font-bold text-base sm:text-lg shadow-lg`}>
                   {day.day}
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors leading-tight">
                     {day.title}
                   </h3>
-                  <div className="flex items-center gap-3 text-slate-600 text-sm mt-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-slate-600 text-xs sm:text-sm mt-1">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      {day.date}
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="truncate">{day.date}</span>
                     </span>
                     <span className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
+                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4" />
                       {day.area}
                     </span>
                   </div>
                 </div>
               </div>
-              <p className="text-slate-600 leading-relaxed">{day.description}</p>
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">{day.description}</p>
             </div>
             
-            <div className="ml-6 text-right">
-              <div className={`inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r ${getColorClasses(day.color)} text-white font-semibold shadow-lg`}>
+            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:ml-6 sm:text-right">
+              <div className={`inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-gradient-to-r ${getColorClasses(day.color)} text-white font-semibold shadow-lg text-sm sm:text-base`}>
                 {formatPrice(day.totalCost, 'JPY', currency)}
                 {day.groupCost && <span className="ml-1 text-xs opacity-90">group</span>}
               </div>
               <motion.div
-                className="mt-3 text-slate-400"
+                className="text-slate-400"
                 animate={{ rotate: isSelected ? 180 : 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <ChevronDown className="w-5 h-5" />
+                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
               </motion.div>
             </div>
           </div>
@@ -101,7 +101,7 @@ const DayCard = ({ day, index, currency, isSelected, onSelect }) => {
             {day.highlights.map((highlight, idx) => (
               <span
                 key={idx}
-                className="px-3 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 transition-colors"
+                className="px-2 sm:px-3 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-full hover:bg-slate-200 transition-colors"
               >
                 {highlight}
               </span>
@@ -116,10 +116,10 @@ const DayCard = ({ day, index, currency, isSelected, onSelect }) => {
           animate={isSelected ? "visible" : "hidden"}
           className="overflow-hidden"
         >
-          <div className="px-6 pb-6 border-t border-slate-100">
+          <div className="px-4 sm:px-6 pb-4 sm:pb-6 border-t border-slate-100">
             {/* Activities */}
-            <div className="mt-6">
-              <h4 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <div className="mt-4 sm:mt-6">
+              <h4 className="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500"></span>
                 Daily Schedule
               </h4>
@@ -128,30 +128,30 @@ const DayCard = ({ day, index, currency, isSelected, onSelect }) => {
 
             {/* Accommodation */}
             {day.accommodation && (
-              <div className="mt-8">
-                <h4 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <div className="mt-6 sm:mt-8">
+                <h4 className="text-base sm:text-lg font-semibold text-slate-800 mb-3 sm:mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-blue-500"></span>
                   Accommodation
                 </h4>
-                <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-6 border border-slate-200">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h5 className="text-lg font-bold text-slate-800">{day.accommodation.name}</h5>
-                      <p className="text-slate-600 text-sm">{day.accommodation.type}</p>
+                <div className="bg-gradient-to-br from-slate-50 to-white rounded-lg sm:rounded-xl p-4 sm:p-6 border border-slate-200">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                    <div className="flex-1">
+                      <h5 className="text-base sm:text-lg font-bold text-slate-800">{day.accommodation.name}</h5>
+                      <p className="text-slate-600 text-xs sm:text-sm">{day.accommodation.type}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <div className="flex items-center text-yellow-500">
                           {[...Array(Math.floor(day.accommodation.rating))].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 fill-current" />
+                            <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
                           ))}
                         </div>
-                        <span className="text-sm text-slate-600 font-medium">{day.accommodation.rating}</span>
+                        <span className="text-xs sm:text-sm text-slate-600 font-medium">{day.accommodation.rating}</span>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-emerald-600">
+                    <div className="text-left sm:text-right">
+                      <div className="text-xl sm:text-2xl font-bold text-emerald-600">
                         {formatPrice(day.accommodation.price, 'JPY', currency)}
                       </div>
-                      <div className="text-sm text-slate-500">per night</div>
+                      <div className="text-xs sm:text-sm text-slate-500">per night</div>
                     </div>
                   </div>
                   
@@ -167,10 +167,10 @@ const DayCard = ({ day, index, currency, isSelected, onSelect }) => {
                       return (
                         <span
                           key={idx}
-                          className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200"
+                          className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200"
                         >
                           {getIcon(feature)}
-                          {feature}
+                          <span className="truncate">{feature}</span>
                         </span>
                       )
                     })}

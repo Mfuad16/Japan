@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Calendar, MapPin, Clock, Camera, Utensils, Users, Train, Mountain, ChevronDown, ChevronUp, Home, Plane, Star, Globe, Building2, Navigation, Info, ExternalLink } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Calendar, MapPin, Clock, Camera, Utensils, Users, Train, Mountain, ChevronDown, ChevronUp, Home, Plane, Star, Globe, Building2, Navigation, Info } from 'lucide-react';
 
 type Currency = 'JPY' | 'INR';
 
@@ -47,6 +47,35 @@ const JapanAdventureItinerary = () => {
       ]
     }
   };
+
+  // Helpers for dynamic totals
+  const parseJPY = (value: string): number => parseInt(value.replace(/[^0-9]/g, '')) || 0;
+  const formatJPY = (amount: number): string => `¥${Math.round(amount).toLocaleString()}`;
+
+  const computed = useMemo(() => {
+    const paidSumJPY = paymentStatus.paid.items.reduce((sum: number, item: any) => sum + parseJPY(item.amount.jpy), 0);
+    const unpaidSumJPY = paymentStatus.unpaid.items.reduce((sum: number, item: any) => sum + parseJPY(item.amount.jpy), 0);
+    const totalJPY = paidSumJPY + unpaidSumJPY;
+
+    const peopleCount = 3;
+    const daysCount = 8;
+
+    const toINR = (j: number) => `₹${Math.round(j * 0.596).toLocaleString()}`;
+
+    return {
+      paidSumJPY,
+      unpaidSumJPY,
+      totalJPY,
+      progressPct: totalJPY > 0 ? Math.round((paidSumJPY / totalJPY) * 100) : 0,
+      display: {
+        total: { jpy: formatJPY(totalJPY), inr: toINR(totalJPY) },
+        perPerson: { jpy: formatJPY(totalJPY / peopleCount), inr: toINR(totalJPY / peopleCount) },
+        perDay: { jpy: formatJPY(totalJPY / daysCount), inr: toINR(totalJPY / daysCount) },
+        paid: { jpy: formatJPY(paidSumJPY), inr: toINR(paidSumJPY) },
+        unpaid: { jpy: formatJPY(unpaidSumJPY), inr: toINR(unpaidSumJPY) },
+      },
+    };
+  }, [paymentStatus, currency]);
 
   // Currency conversion rate (1 JPY = 0.596 INR approximately)
   const convertPrice = (jpyPrice: string): string => {
@@ -791,9 +820,9 @@ const JapanAdventureItinerary = () => {
   ];
 
   const budgetData = {
-    total: { jpy: "¥293,875", inr: "₹175,149" },
-    perPerson: { jpy: "¥97,958", inr: "₹58,383" },
-    perDay: { jpy: "¥36,734", inr: "₹21,893" },
+    total: computed.display.total,
+    perPerson: computed.display.perPerson,
+    perDay: computed.display.perDay,
     breakdown: [
       { category: "Transportation", percentage: 38, amount: { jpy: "¥180,000", inr: "₹107,280" }, color: "bg-blue-600" },
       { category: "Accommodation", percentage: 28, amount: { jpy: "¥135,000", inr: "₹80,460" }, color: "bg-emerald-600" },
@@ -862,7 +891,7 @@ const JapanAdventureItinerary = () => {
       </div>
 
       {/* Modern Hero Header */}
-      <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 px-4 py-8 sm:py-16 overflow-hidden">
+      <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 px-3 py-5 sm:py-16 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
@@ -870,7 +899,7 @@ const JapanAdventureItinerary = () => {
         </div>
         
         <div className="relative max-w-6xl mx-auto text-center">
-          <div className="flex flex-col items-center mb-6 sm:mb-8">
+          <div className="flex flex-col items-center mb-4 sm:mb-8">
             {/* Modern Icon */}
             <div className="relative mb-4 sm:mb-6">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-white to-gray-100 rounded-3xl shadow-2xl flex items-center justify-center transform rotate-6 hover:rotate-12 transition-transform duration-500">
@@ -880,7 +909,7 @@ const JapanAdventureItinerary = () => {
             </div>
             
             {/* Modern Title */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-indigo-200 leading-tight mb-3">
+            <h1 className="text-2xl sm:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-blue-100 to-indigo-200 leading-tight mb-2">
               Japan Adventure
             </h1>
             
@@ -892,17 +921,13 @@ const JapanAdventureItinerary = () => {
           </div>
           
           {/* Description Cards */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8 sm:mb-12">
-            <div className="flex-1 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 shadow-lg">
-              <p className="text-white/80 text-sm sm:text-base font-medium">Comprehensive halal dining guide</p>
-            </div>
-            <div className="flex-1 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 shadow-lg">
-              <p className="text-white/80 text-sm sm:text-base font-medium">Detailed directions & bookings</p>
-            </div>
+          <div className="hidden sm:flex flex-row gap-3 sm:gap-4 mb-8 sm:mb-12">
+            <div className="flex-1 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 shadow-lg"><p className="text-white/80 text-sm sm:text-base font-medium">Comprehensive halal dining guide</p></div>
+            <div className="flex-1 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 shadow-lg"><p className="text-white/80 text-sm sm:text-base font-medium">Detailed directions & bookings</p></div>
           </div>
           
           {/* Route Display */}
-          <div className="flex items-center justify-center gap-2 sm:gap-3 text-gray-300 mb-8">
+          <div className="hidden sm:flex items-center justify-center gap-2 sm:gap-3 text-gray-300 mb-8">
             {['Tokyo', 'Osaka', 'Kyoto', 'Hiroshima'].map((city, index) => (
               <div key={city} className="flex items-center">
                 <span className="text-xs sm:text-sm font-semibold px-2 py-1 bg-white/10 rounded-lg">{city}</span>
@@ -946,14 +971,14 @@ const JapanAdventureItinerary = () => {
         <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 lg:py-12">
           {/* Detailed Itinerary Tab */}
           {activeTab === 'itinerary' && (
-            <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+            <div className="space-y-3 sm:space-y-6 lg:space-y-8">
               {itineraryData.map((day) => (
-                <div key={day.day} className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-gray-200 transform hover:-translate-y-1">
+                <div key={day.day} className="group bg-white rounded-xl sm:rounded-2xl shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-gray-200">
                   {/* Modern Gradient Header */}
                   <div className={`h-1 bg-gradient-to-r ${day.gradient} relative overflow-hidden`}>
                     <div className="absolute inset-0 bg-white/20 transform -skew-x-12 translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
                   </div>
-                  <div className="p-4 sm:p-6">
+                  <div className="p-3 sm:p-6">
                   <div className="cursor-pointer group/header" onClick={() => toggleDay(day.day)}>
                     {/* Modern Day Header */}
                     <div className="flex items-start space-x-4 mb-4">
@@ -987,10 +1012,10 @@ const JapanAdventureItinerary = () => {
                     </div>
                     
                     {/* Modern Price and Action Section */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                       <div className="flex items-center space-x-3">
                         {/* Price Badge */}
-                        <div className={`inline-flex items-center px-4 py-2 rounded-xl bg-gradient-to-r ${day.gradient} text-white font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105`}>
+                        <div className={`inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r ${day.gradient} text-white font-semibold text-sm shadow-lg`}>
                           <span>{convertPrice(day.price)}</span>
                           {day.priceType && <span className="text-xs opacity-80 ml-1">{day.priceType}</span>}
                         </div>
@@ -1012,19 +1037,11 @@ const JapanAdventureItinerary = () => {
                     </div>
                   </div>
                   
-                  {/* Modern Tags */}
-                  <div className="flex flex-wrap gap-2 px-4 pb-4">
-                    {day.tags.map((tag, index) => (
-                      <span key={index} className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 text-gray-700 rounded-full text-xs font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105">
-                        <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${day.gradient} mr-2`}></div>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+                  {/* Tags hidden on mobile to reduce clutter */}
 
                   {/* Accommodation Information */}
                   {day.accommodation && (
-                    <div className="mt-4 p-4 sm:p-5 bg-white rounded-lg border border-emerald-200 shadow-sm">
+                    <div className="mt-3 p-3 sm:p-5 bg-white rounded-lg border border-emerald-200 shadow-sm">
                       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                         <div className="flex items-start space-x-3 flex-1">
                           <Home className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-1" />
@@ -1042,24 +1059,24 @@ const JapanAdventureItinerary = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="bg-white px-4 py-3 rounded-lg border border-emerald-300 shadow-sm">
+                        <div className="bg-white px-3 py-2 rounded-lg border border-emerald-300 shadow-sm">
                           <span className="text-xl font-bold text-emerald-700">{convertPrice(day.accommodation.cost)}</span>
                           <p className="text-xs text-emerald-600 mt-1">total for group</p>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                        <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+                        <div className="bg-white p-2.5 rounded-lg border border-emerald-200 shadow-sm">
                           <span className="text-gray-500 text-xs font-medium uppercase tracking-wide">Check-in</span>
                           <p className="font-semibold text-emerald-700 mt-1">{day.accommodation.checkIn}</p>
                         </div>
-                        <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-sm">
+                        <div className="bg-white p-2.5 rounded-lg border border-emerald-200 shadow-sm">
                           <span className="text-gray-500 text-xs font-medium uppercase tracking-wide">Check-out</span>
                           <p className="font-semibold text-emerald-700 mt-1">{day.accommodation.checkOut}</p>
                         </div>
                       </div>
                       
-                      <div className="bg-white p-3 rounded-lg border border-emerald-200 shadow-sm mt-3">
+                      <div className="bg-white p-2.5 rounded-lg border border-emerald-200 shadow-sm mt-2.5">
                         <span className="text-gray-500 text-xs font-medium uppercase tracking-wide mb-2 block">Amenities</span>
                         <div className="flex flex-wrap gap-2">
                           {day.accommodation.amenities.map((amenity, idx) => (
@@ -1110,26 +1127,19 @@ const JapanAdventureItinerary = () => {
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="flex items-center space-x-2 text-gray-600">
                                     <MapPin className="w-4 h-4 flex-shrink-0" />
-                                    <span className="font-medium">{item.location}</span>
+                                    <span className="font-medium break-words whitespace-normal leading-snug">{item.location}</span>
                                   </div>
                                   
                                   {/* Google Maps Navigation Button */}
                                   {item.previousLocation && (
                                     <button
                                       onClick={() => openGoogleMaps(item.previousLocation, item.location)}
-                                      className="flex items-center space-x-2 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-colors duration-200 shadow-sm"
+                                      className="px-2.5 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md transition-colors duration-200 shadow-sm flex items-center gap-1"
                                     >
                                       <Navigation className="w-3 h-3" />
                                       <span>Navigate</span>
-                                      <ExternalLink className="w-3 h-3" />
                                     </button>
                                   )}
-                                </div>
-                              )}
-                              
-                              {item.details && (
-                                <div className="bg-white p-3 rounded-lg border border-gray-200 mb-3 shadow-sm">
-                                  <p className="text-gray-700 text-sm leading-relaxed">{item.details}</p>
                                 </div>
                               )}
                               
@@ -1146,47 +1156,6 @@ const JapanAdventureItinerary = () => {
                           </div>
                         ))}
                       </div>
-                      
-                      {/* Travel Information - Subtle Section */}
-                      {day.travel && (
-                        <details className="mt-4 group">
-                          <summary className="cursor-pointer p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors">
-                            <div className="flex items-center space-x-2">
-                              <Navigation className="w-4 h-4 text-gray-600 group-open:text-blue-600 transition-colors" />
-                              <h5 className="font-medium text-gray-700 group-open:text-blue-700 text-sm">Travel Information</h5>
-                              <span className="text-xs text-gray-500 ml-auto">Click to expand</span>
-                            </div>
-                          </summary>
-                          <div className="mt-3 p-4 bg-white rounded-lg border border-gray-200 shadow-sm">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                              <div className="space-y-2">
-                                <div>
-                                  <span className="text-gray-600 font-medium text-xs uppercase tracking-wide">Route:</span>
-                                  <p className="text-gray-800 mt-0.5">{day.travel.route}</p>
-                                </div>
-                                <div>
-                                  <span className="text-gray-600 font-medium text-xs uppercase tracking-wide">Method:</span>
-                                  <p className="text-gray-800 mt-0.5">{day.travel.method}</p>
-                                </div>
-                              </div>
-                              <div className="space-y-2">
-                                <div>
-                                  <span className="text-gray-600 font-medium text-xs uppercase tracking-wide">Duration:</span>
-                                  <p className="text-gray-800 mt-0.5">{day.travel.duration}</p>
-                                </div>
-                                <div>
-                                  <span className="text-gray-600 font-medium text-xs uppercase tracking-wide">Cost:</span>
-                                  <p className="text-gray-800 mt-0.5">{day.travel.cost || day.travel.totalCost}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                              <span className="text-gray-600 font-medium text-xs uppercase tracking-wide">Instructions:</span>
-                              <p className="text-gray-700 text-sm mt-1 leading-relaxed">{day.travel.instructions}</p>
-                            </div>
-                          </div>
-                        </details>
-                      )}
                       
                       {/* Daily Tips */}
                       {day.tips && (
@@ -1342,30 +1311,32 @@ const JapanAdventureItinerary = () => {
               <div className="mb-4 sm:mb-6">
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <span className="text-xs sm:text-sm font-medium text-gray-700">Overall Progress</span>
-                  <span className="text-xl sm:text-2xl font-bold text-slate-600">{paymentStatus.paid.percentage}%</span>
+                  <span className="text-xl sm:text-2xl font-bold text-slate-600">{computed.progressPct}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 sm:h-4 overflow-hidden shadow-inner">
-                  <div 
-                    className="bg-gradient-to-r from-slate-600 to-slate-700 h-3 sm:h-4 rounded-full transition-all duration-1000 shadow-sm"
-                    style={{ width: `${paymentStatus.paid.percentage}%` }}
+                <div className="w-full bg-gray-200 rounded-xl h-3 sm:h-4 overflow-hidden">
+                  <div
+                    className="h-3 sm:h-4 rounded-xl bg-gradient-to-r from-slate-600 to-slate-700"
+                    style={{ width: `${computed.progressPct}%` }}
                   ></div>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between mt-2 sm:mt-3 text-xs sm:text-sm space-y-1 sm:space-y-0">
-                  <span className="text-slate-600 font-medium">
-                    ✅ Paid: {paymentStatus.paid.total[currency.toLowerCase() as keyof typeof paymentStatus.paid.total]}
-                  </span>
-                  <span className="text-amber-600 font-medium">
-                    ⏳ Remaining: {paymentStatus.unpaid.total[currency.toLowerCase() as keyof typeof paymentStatus.unpaid.total]}
-                  </span>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                  <div className="rounded-lg bg-white p-2 border border-slate-200">
+                    <div className="text-slate-600 font-medium">Paid</div>
+                    <div className="font-bold text-slate-700">{currency === 'JPY' ? computed.display.paid.jpy : computed.display.paid.inr}</div>
+                  </div>
+                  <div className="rounded-lg bg-white p-2 border border-amber-200">
+                    <div className="text-amber-700 font-medium">Remaining</div>
+                    <div className="font-bold text-amber-700">{currency === 'JPY' ? computed.display.unpaid.jpy : computed.display.unpaid.inr}</div>
+                  </div>
                 </div>
               </div>
 
               {/* Paid Items */}
-              <div className="mb-4 sm:mb-6">
-                <h4 className="text-sm sm:text-md font-bold text-slate-700 mb-2 sm:mb-3 flex items-center space-x-2">
+              <details className="mb-4 sm:mb-6" open>
+                <summary className="cursor-pointer select-none text-sm sm:text-md font-bold text-slate-700 mb-2 sm:mb-3 flex items-center space-x-2">
                   <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-slate-500 rounded-full"></span>
                   <span>Paid Items</span>
-                </h4>
+                </summary>
                 <div className="space-y-2 sm:space-y-3">
                   {paymentStatus.paid.items.map((item: any, index: number) => (
                     <div key={index} className="bg-white border border-slate-200 rounded-lg p-2.5 sm:p-3 flex flex-col sm:flex-row sm:justify-between sm:items-center shadow-sm space-y-1 sm:space-y-0">
@@ -1377,14 +1348,14 @@ const JapanAdventureItinerary = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </details>
 
               {/* Unpaid Items */}
-              <div>
-                <h4 className="text-sm sm:text-md font-bold text-amber-800 mb-2 sm:mb-3 flex items-center space-x-2">
+              <details>
+                <summary className="cursor-pointer select-none text-sm sm:text-md font-bold text-amber-800 mb-2 sm:mb-3 flex items-center space-x-2">
                   <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-amber-500 rounded-full"></span>
                   <span>Pending Payments</span>
-                </h4>
+                </summary>
                 <div className="space-y-2 sm:space-y-3">
                   {paymentStatus.unpaid.items.map((item: any, index: number) => (
                     <div key={index} className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 sm:p-3 flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-1 sm:space-y-0">
@@ -1396,7 +1367,7 @@ const JapanAdventureItinerary = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </details>
             </div>
 
             {/* Detailed Accommodation Costs */}

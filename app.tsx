@@ -21,6 +21,7 @@ const JapanAdventureItinerary = () => {
   const [activeTab, setActiveTab] = useState('itinerary');
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [currency, setCurrency] = useState<Currency>('JPY');
+  
 
   const paymentStatus = {
     paid: {
@@ -55,7 +56,10 @@ const JapanAdventureItinerary = () => {
   const computed = useMemo(() => {
     const paidSumJPY = paymentStatus.paid.items.reduce((sum: number, item: any) => sum + parseJPY(item.amount.jpy), 0);
     const unpaidSumJPY = paymentStatus.unpaid.items.reduce((sum: number, item: any) => sum + parseJPY(item.amount.jpy), 0);
-    const totalJPY = paidSumJPY + unpaidSumJPY;
+    // Add ¥2,000 per accommodation (3 accommodations in itinerary)
+    const accommodationCount = 3; // avoid referencing itineraryData before declaration
+    const accommodationFeeJPY = 2000 * accommodationCount;
+    const totalJPY = paidSumJPY + unpaidSumJPY + accommodationFeeJPY;
 
     const peopleCount = 3;
     const daysCount = 8;
@@ -1060,7 +1064,7 @@ const JapanAdventureItinerary = () => {
                           </div>
                         </div>
                         <div className="bg-white px-3 py-2 rounded-lg border border-emerald-300 shadow-sm">
-                          <span className="text-xl font-bold text-emerald-700">{convertPrice(day.accommodation.cost)}</span>
+                          <span className="text-xl font-bold text-emerald-700">{convertPrice((parseInt(day.accommodation.cost.replace(/[^0-9]/g, '')) + 2000).toString())}</span>
                           <p className="text-xs text-emerald-600 mt-1">total for group</p>
                         </div>
                       </div>
@@ -1402,6 +1406,8 @@ const JapanAdventureItinerary = () => {
             </div>
           </div>
         )}
+
+        {/* Docs Tab removed */}
       </div>
     </div>
     </div>

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Calendar, MapPin, Clock, Camera, Utensils, Users, Train, Mountain, ChevronDown, ChevronUp, Home, Plane, Star, Globe, Building2, Navigation, Info, FileText, Upload, Download, Eye, Trash2, X, Edit3, Check, X as XIcon } from 'lucide-react';
+import { Calendar, MapPin, Clock, Camera, Utensils, Users, Train, Mountain, ChevronDown, ChevronUp, Home, Plane, Star, Globe, Building2, Navigation, Info, FileText, Download, Eye, X, Edit3, Check, X as XIcon } from 'lucide-react';
 
 type Currency = 'JPY' | 'INR';
 
@@ -34,10 +34,8 @@ const JapanAdventureItinerary = () => {
   const [currency, setCurrency] = useState<Currency>('JPY');
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [selectedDocument, setSelectedDocument] = useState<DocumentItem | null>(null);
-  const [isDragOver, setIsDragOver] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
   
   // Debug useEffect to monitor documents state
   useEffect(() => {
@@ -63,7 +61,10 @@ const JapanAdventureItinerary = () => {
         { name: 'Tokyo-Shinosakabullettrain.pdf', displayName: 'Tokyo-Shin-Osaka Bullet Train' },
         { name: 'tokyo-shinosaka.pdf', displayName: 'Tokyo-Shin-Osaka Train Ticket' },
         { name: 'tokyo-shinosaka01.pdf', displayName: 'Tokyo-Shin-Osaka Train Details' },
-        { name: 'AONIYOSHI-Limited express ticket.png', displayName: 'AONIYOSHI Limited Express Ticket' }
+        { name: 'AONIYOSHI-Limited express ticket.png', displayName: 'AONIYOSHI Limited Express Ticket' },
+        { name: 'DISNEYLAND_ADULT01.png', displayName: 'Tokyo Disneyland Ticket - Adult 1' },
+        { name: 'DISNEYLAND_ADULT02.png', displayName: 'Tokyo Disneyland Ticket - Adult 2' },
+        { name: 'DISNEYLAND_JUNIOR.png', displayName: 'Tokyo Disneyland Ticket - Junior' }
       ];
 
       const existingDocs: DocumentItem[] = existingFiles.map(file => ({
@@ -88,24 +89,24 @@ const JapanAdventureItinerary = () => {
 
   const paymentStatus = {
     paid: {
-      percentage: 91,
-      total: { jpy: "¥323,001", inr: "₹192,549" },
+      percentage: 95,
+      total: { jpy: "¥365,625", inr: "₹217,672" },
       items: [
         { name: "Tokyo Accommodation (Airbnb)", amount: { jpy: "¥66,000", inr: "₹39,336" }, date: "Paid" },
         { name: "Osaka Hotel (2 nights)", amount: { jpy: "¥46,000", inr: "₹27,416" }, date: "Paid" },
         { name: "Hiroshima Hotel (1 night)", amount: { jpy: "¥23,000", inr: "₹13,708" }, date: "Paid" },
         { name: "Shinkansen NOZOMI 11 (Tokyo-Osaka)", amount: { jpy: "¥42,960", inr: "₹25,604" }, date: "Paid - Reservation #2000" },
-        { name: "Domestic Flight (Hiroshima-Tokyo)", amount: { jpy: "¥43,375", inr: "₹25,851" }, date: "Paid" },
+        { name: "Domestic Flight (Hiroshima-Tokyo)", amount: { jpy: "¥46,000", inr: "₹27,416" }, date: "Paid" },
         { name: "Mount Fuji Private Tour", amount: { jpy: "¥75,000", inr: "₹44,700" }, date: "Paid" },
         { name: "Universal Studios Japan Studio Pass", amount: { jpy: "¥33,000", inr: "₹19,668" }, date: "Paid - Sept 29, 2025" },
         { name: "Limited Express AONIYOSHI (Osaka-Kyoto)", amount: { jpy: "¥3,000", inr: "₹1,788" }, date: "Paid - Sept 30, 2025" },
-        { name: "Private Car Transfer (Airport-Tokyo)", amount: { jpy: "¥16,000", inr: "₹9,536" }, date: "Paid - Sept 25, 2025" }
+        { name: "Private Car Transfer (Airport-Tokyo)", amount: { jpy: "¥16,000", inr: "₹9,536" }, date: "Paid - Sept 25, 2025" },
+        { name: "Tokyo Disneyland Tickets", amount: { jpy: "¥34,000", inr: "₹20,264" }, date: "Paid - Sept 27, 2025" }
       ]
     },
     unpaid: {
-      total: { jpy: "¥23,834", inr: "₹14,165" },
+      total: { jpy: "¥17,634", inr: "₹10,510" },
       items: [
-        { name: "Tokyo Disneyland Tickets", amount: { jpy: "¥25,200", inr: "₹15,019" }, date: "Need to book" },
         { name: "teamLab Planets Tickets", amount: { jpy: "¥9,600", inr: "₹5,722" }, date: "Need to book" },
         { name: "Additional Transportation", amount: { jpy: "¥8,034", inr: "₹4,788" }, date: "Pay on arrival" }
       ]
@@ -161,61 +162,6 @@ const JapanAdventureItinerary = () => {
     window.open(url, '_blank');
   };
 
-  const handleFileUpload = async (files: FileList | File[]) => {
-    if (isUploading) return; // Prevent multiple uploads
-    
-    const fileArray = Array.from(files);
-    const validFiles = fileArray.filter(file => 
-      file.type === 'application/pdf' || 
-      file.type.startsWith('image/')
-    );
-    
-    if (validFiles.length === 0) {
-      alert('Please select PDF or image files only.');
-      return;
-    }
-    
-    setIsUploading(true);
-    
-    try {
-      const newDocs: DocumentItem[] = [];
-      
-      for (const file of validFiles) {
-        // Use original filename for simplicity in this demo
-        const fileName = file.name;
-        const newDoc: DocumentItem = {
-          id: 'upload-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
-          name: file.name,
-          displayName: file.name.replace(/\.(pdf|png|jpg|jpeg)$/i, ''),
-          type: getDocumentType(file.name),
-          file: file,
-          uploadDate: new Date(),
-          url: URL.createObjectURL(file),
-          filePath: `/files/${fileName}`
-        };
-        
-        newDocs.push(newDoc);
-        
-        // In a real app, you would save the file to the server here
-        // For now, we'll just simulate saving to the files directory
-        console.log(`Would save file to: files/${fileName}`);
-      }
-      
-      // Update state by adding to existing documents
-      setDocuments(prev => {
-        const updated = [...prev, ...newDocs];
-        console.log('Updated documents:', updated.length); // Debug log
-        return updated;
-      });
-      
-      console.log(`Successfully added ${newDocs.length} new documents to the list`);
-    } catch (error) {
-      console.error('Error processing uploaded files:', error);
-      alert('Error processing files. Please try again.');
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const getDocumentType = (filename: string): DocumentItem['type'] => {
     const lower = filename.toLowerCase();
@@ -225,33 +171,7 @@ const JapanAdventureItinerary = () => {
     return 'other';
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const files = e.dataTransfer.files;
-    await handleFileUpload(files);
-  };
-
-  const deleteDocument = (id: string) => {
-    const doc = documents.find(d => d.id === id);
-    if (doc) {
-      URL.revokeObjectURL(doc.url);
-      setDocuments(prev => prev.filter(d => d.id !== id));
-      if (selectedDocument?.id === id) {
-        setSelectedDocument(null);
-      }
-    }
-  };
 
   const downloadDocument = (doc: DocumentItem) => {
     const link = document.createElement('a');
@@ -464,7 +384,7 @@ const JapanAdventureItinerary = () => {
       date: "September 27, 2025",
       location: "Tokyo Disney",
       description: "Full day magical experience at Tokyo Disneyland",
-      price: "¥25,000",
+      price: "¥34,000",
       priceType: "",
       gradient: "from-indigo-700 to-indigo-800",
       bgColor: "bg-indigo-50",
@@ -537,7 +457,7 @@ const JapanAdventureItinerary = () => {
         }
       ],
       tips: [
-        "⚠️ TICKETS NOT YET BOOKED - Need to purchase (¥25,200 for 3 people)",
+        "✅ TICKETS PAID - Tokyo Disneyland tickets purchased (¥34,000 for 3 people)",
         "Download official Tokyo Disney Resort app",
         "Contact Guest Relations for halal meal options in advance",
         "Park stays open until 10 PM - enjoy night illuminations"
@@ -948,7 +868,7 @@ const JapanAdventureItinerary = () => {
         route: "Hiroshima → Tokyo → Airport",
         method: "Flight + Private Car",
         duration: "1.5-hour flight + airport transfer",
-        cost: "¥43,375 flight + ¥15,000 transfer",
+        cost: "¥46,000 flight + ¥15,000 transfer",
         instructions: "Morning flight to Haneda, then teamLab visit, private transfer to airport for departure."
       },
       schedule: [
@@ -957,7 +877,7 @@ const JapanAdventureItinerary = () => {
           type: "transport", 
           activity: "Flight to Tokyo Haneda", 
           icon: "✈️", 
-          price: "¥43,375", 
+          price: "¥46,000", 
           location: "Haneda Airport, Tokyo, Japan",
           details: "JAL256 domestic flight (12:10-13:25). Check baggage allowance. Arrive airport 1 hour early.",
           note: "Flight JAL256 booked for 3 people",
@@ -1608,98 +1528,75 @@ const JapanAdventureItinerary = () => {
 
         {/* Documents Tab */}
         {activeTab === 'documents' && (
-          <div className="space-y-6 sm:space-y-8">
-            <div className="text-center mb-6 sm:mb-8 px-4">
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Travel Documents</h3>
-              <p className="text-gray-600 text-sm sm:text-base">Store and view your travel documents - flight tickets, hotel bookings, and more</p>
-              <div className="mt-3 flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm text-gray-500">
-                <span>📁 Files stored in: <code className="bg-gray-100 px-2 py-1 rounded text-xs">/files/</code></span>
-                <span>📊 Total documents: <strong className="text-gray-700">{documents.length}</strong></span>
+          <div className="space-y-8">
+            {/* Header Section with improved design */}
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 rounded-3xl"></div>
+              <div className="absolute inset-0 bg-white/30 backdrop-blur-sm rounded-3xl"></div>
+              <div className="relative px-8 py-10 text-center">
+                <div className="flex justify-center mb-6">
+                  <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-xl">
+                    <FileText className="w-10 h-10 text-white" />
+                  </div>
+                </div>
+                <h3 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent mb-4">
+                  Travel Documents
+                </h3>
+                <p className="text-gray-700 text-lg sm:text-xl font-medium mb-6 max-w-2xl mx-auto">
+                  Your complete collection of travel documents, tickets, and reservations
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-8">
+                  <div className="flex items-center space-x-2 px-4 py-2 bg-white/80 rounded-full border border-orange-200 shadow-sm">
+                    <span className="text-2xl">📁</span>
+                    <span className="text-gray-700 font-medium">Stored in /files/</span>
+                  </div>
+                  <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-full shadow-md">
+                    <span className="text-xl">📊</span>
+                    <span className="font-bold">{documents.length} Documents</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Upload Section */}
-            <div 
-              className={`bg-white rounded-xl p-6 sm:p-8 shadow-lg border-2 border-dashed transition-all duration-300 ${
-                isDragOver ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-orange-400'
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <div className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
-                    <Upload className="w-8 h-8 text-white" />
-                  </div>
-                </div>
-                <h4 className="text-lg font-bold text-gray-900 mb-2">Upload Travel Documents</h4>
-                <p className="text-gray-600 mb-4">Drag and drop PDF files or images here or click to browse</p>
-                <input
-                  type="file"
-                  accept=".pdf,.png,.jpg,.jpeg"
-                  multiple
-                  className="hidden"
-                  id="file-upload"
-                  onChange={async (e) => {
-                    if (e.target.files) {
-                      await handleFileUpload(e.target.files);
-                      e.target.value = ''; // Clear the input after upload
-                    }
-                  }}
-                />
-                <label
-                  htmlFor="file-upload"
-                  className={`inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 ${
-                    isUploading ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  <FileText className="w-5 h-5 mr-2" />
-                  {isUploading ? 'Uploading...' : 'Choose Files'}
-                </label>
-              </div>
-            </div>
 
             {/* Documents Grid */}
             {documents.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {documents.map((doc) => (
-                  <div key={doc.id} className="bg-white rounded-xl p-4 sm:p-5 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className={`w-12 h-12 bg-gradient-to-br ${getDocumentColor(doc.type)} rounded-xl flex items-center justify-center text-white text-xl shadow-lg`}>
-                        {getDocumentIcon(doc.type)}
+                  <div key={doc.id} className="relative bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 group overflow-hidden cursor-pointer sm:cursor-default" 
+                    onClick={() => window.innerWidth < 640 ? setSelectedDocument(doc) : undefined}>
+                    {/* Subtle background gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-50/50 to-white rounded-2xl"></div>
+                    
+                    <div className="relative">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`w-14 h-14 bg-gradient-to-br ${getDocumentColor(doc.type)} rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                          {getDocumentIcon(doc.type)}
+                        </div>
+                        <div className="flex space-x-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+                          <button
+                            onClick={() => setSelectedDocument(doc)}
+                            className="p-2 text-blue-500 sm:text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 hover:scale-110"
+                            title="View Document"
+                          >
+                            <Eye className="w-5 h-5 sm:w-4 sm:h-4" />
+                          </button>
+                          <button
+                            onClick={() => startEditing(doc)}
+                            className="p-2 text-purple-500 sm:text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-xl transition-all duration-200 hover:scale-110"
+                            title="Edit Name"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => downloadDocument(doc)}
+                            className="p-2 text-green-500 sm:text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-xl transition-all duration-200 hover:scale-110"
+                            title="Download"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex space-x-1">
-                        <button
-                          onClick={() => setSelectedDocument(doc)}
-                          className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-                          title="View Document"
-                        >
-                          <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </button>
-                        <button
-                          onClick={() => startEditing(doc)}
-                          className="p-1.5 sm:p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200"
-                          title="Edit Name"
-                        >
-                          <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </button>
-                        <button
-                          onClick={() => downloadDocument(doc)}
-                          className="p-1.5 sm:p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
-                          title="Download"
-                        >
-                          <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </button>
-                        <button
-                          onClick={() => deleteDocument(doc.id)}
-                          className="p-1.5 sm:p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </button>
-                      </div>
-                    </div>
                     
                     {editingId === doc.id ? (
                       <div className="mb-3">
@@ -1730,26 +1627,33 @@ const JapanAdventureItinerary = () => {
                         </div>
                       </div>
                     ) : (
-                      <h4 className="font-bold text-gray-900 mb-2 truncate" title={doc.displayName}>
-                        {doc.displayName}
-                      </h4>
-                    )}
-                    <p className="text-xs text-gray-500 mb-2" title={doc.name}>
-                      File: {doc.name}
-                    </p>
-                    
-                    <div className="flex items-center justify-between text-sm text-gray-600">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        doc.type === 'flight' ? 'bg-blue-100 text-blue-700' :
-                        doc.type === 'hotel' ? 'bg-emerald-100 text-emerald-700' :
-                        doc.type === 'ticket' ? 'bg-purple-100 text-purple-700' :
-                        'bg-gray-100 text-gray-700'
-                      }`}>
-                        {doc.type.charAt(0).toUpperCase() + doc.type.slice(1)}
-                      </span>
-                      <span className="text-xs">
-                        {doc.uploadDate.toLocaleDateString()}
-                      </span>
+                        <h4 className="font-bold text-gray-900 mb-2 text-lg leading-tight" title={doc.displayName}>
+                          {doc.displayName}
+                        </h4>
+                      )}
+                      <p className="text-sm text-gray-500 mb-3 truncate" title={doc.name}>
+                        📄 {doc.name}
+                      </p>
+                      
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm ${
+                          doc.type === 'flight' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                          doc.type === 'hotel' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                          doc.type === 'ticket' ? 'bg-purple-100 text-purple-700 border border-purple-200' :
+                          'bg-gray-100 text-gray-700 border border-gray-200'
+                        }`}>
+                          {doc.type.charAt(0).toUpperCase() + doc.type.slice(1)}
+                        </span>
+                        <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-md">
+                          {doc.uploadDate.toLocaleDateString()}
+                        </span>
+                      </div>
+                      
+                      {/* Mobile tap indicator */}
+                      <div className="sm:hidden flex items-center justify-center text-xs text-gray-400 pt-2 border-t border-gray-100">
+                        <Eye className="w-3 h-3 mr-1" />
+                        <span>Tap to view document</span>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1757,12 +1661,17 @@ const JapanAdventureItinerary = () => {
             )}
 
             {documents.length === 0 && (
-              <div className="text-center py-12">
-                <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                  <FileText className="w-12 h-12 text-gray-400" />
+              <div className="text-center py-16">
+                <div className="relative mx-auto mb-8">
+                  <div className="w-32 h-32 mx-auto bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center shadow-lg">
+                    <FileText className="w-16 h-16 text-gray-400" />
+                  </div>
+                  <div className="absolute -inset-4 bg-gradient-to-r from-orange-200 to-amber-200 rounded-full opacity-20 animate-pulse"></div>
                 </div>
-                <h4 className="text-lg font-medium text-gray-900 mb-2">No documents uploaded yet</h4>
-                <p className="text-gray-600">Upload your travel documents to keep them organized and easily accessible</p>
+                <h4 className="text-2xl font-bold text-gray-800 mb-4">Documents Ready to Load</h4>
+                <p className="text-gray-600 text-lg max-w-md mx-auto">
+                  Your travel documents are being prepared for display
+                </p>
               </div>
             )}
 

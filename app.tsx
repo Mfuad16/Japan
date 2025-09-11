@@ -9,6 +9,7 @@ interface ScheduleItem {
   activity: string;
   icon: string;
   location?: string;
+  
   details?: string;
   previousLocation?: string | null;
   price?: string;
@@ -911,8 +912,8 @@ const JapanAdventureItinerary = () => {
           </div>
           
           {/* Modern Navigation */}
-          <div className="flex flex-row justify-center gap-1 sm:gap-2 px-2">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-1.5 border border-white/20 shadow-xl">
+          <div className="px-2 flex justify-center">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-1.5 border border-white/20 shadow-xl w-full max-w-md grid grid-cols-3 gap-1 sm:flex sm:flex-row sm:gap-2">
               {[
                 { id: 'itinerary', icon: Calendar, label: 'Itinerary', color: 'from-blue-500 to-blue-600' },
                 { id: 'journey', icon: MapPin, label: 'Journey', color: 'from-emerald-500 to-emerald-600' },
@@ -921,18 +922,18 @@ const JapanAdventureItinerary = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative px-4 py-3 sm:px-6 sm:py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all duration-300 text-sm group overflow-hidden ${
-                    activeTab === tab.id 
-                      ? `bg-gradient-to-r ${tab.color} text-white shadow-lg transform scale-105` 
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                  aria-pressed={activeTab === tab.id}
+                  className={`relative w-full px-3 py-3 sm:px-6 sm:py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 text-xs sm:text-sm group overflow-hidden ${
+                    activeTab === tab.id
+                      ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`}
                 >
                   {activeTab === tab.id && (
-                    <div className="absolute inset-0 bg-white/20 rounded-xl animate-pulse"></div>
+                    <div className="absolute inset-0 bg-white/20 rounded-xl"></div>
                   )}
                   <tab.icon className={`w-4 h-4 transition-transform duration-300 ${activeTab === tab.id ? 'scale-110' : 'group-hover:scale-105'}`} />
-                  <span className="hidden sm:inline relative z-10">{tab.label}</span>
-                  <span className="sm:hidden text-xs relative z-10">{tab.label.slice(0, 3)}</span>
+                  <span className="relative z-10">{tab.label}</span>
                 </button>
               ))}
             </div>
@@ -1206,8 +1207,8 @@ const JapanAdventureItinerary = () => {
                       )}
                     </div>
                   )}
+                  </div>
                 </div>
-              </div>
             ))}
           </div>
         )}
@@ -1431,6 +1432,7 @@ const JapanAdventureItinerary = () => {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };

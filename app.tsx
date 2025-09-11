@@ -75,8 +75,8 @@ const JapanAdventureItinerary = () => {
           type: file.name.toLowerCase().includes('.png') ? 'image/png' : 'application/pdf' 
         }),
         uploadDate: new Date(),
-        url: `files/${file.name}`,
-        filePath: `files/${file.name}`
+        url: `/files/${file.name}`,
+        filePath: `/files/${file.name}`
       }));
 
       setDocuments(existingDocs);
@@ -191,7 +191,7 @@ const JapanAdventureItinerary = () => {
           file: file,
           uploadDate: new Date(),
           url: URL.createObjectURL(file),
-          filePath: `files/${fileName}`
+          filePath: `/files/${fileName}`
         };
         
         newDocs.push(newDoc);
@@ -1613,7 +1613,7 @@ const JapanAdventureItinerary = () => {
               <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Travel Documents</h3>
               <p className="text-gray-600 text-sm sm:text-base">Store and view your travel documents - flight tickets, hotel bookings, and more</p>
               <div className="mt-3 flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm text-gray-500">
-                <span>📁 Files stored in: <code className="bg-gray-100 px-2 py-1 rounded text-xs">files/</code></span>
+                <span>📁 Files stored in: <code className="bg-gray-100 px-2 py-1 rounded text-xs">/files/</code></span>
                 <span>📊 Total documents: <strong className="text-gray-700">{documents.length}</strong></span>
               </div>
             </div>

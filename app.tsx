@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Calendar, MapPin, Clock, Camera, Utensils, Users, Train, Mountain, ChevronDown, ChevronUp, Home, Plane, Star, Globe, Building2, Navigation, Info } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Calendar, MapPin, Clock, Camera, Utensils, Users, Train, Mountain, ChevronDown, ChevronUp, Home, Plane, Star, Globe, Building2, Navigation, Info, FileText, Upload, Download, Eye, Trash2, X, Edit3, Check, X as XIcon } from 'lucide-react';
 
 type Currency = 'JPY' | 'INR';
 
@@ -17,11 +17,74 @@ interface ScheduleItem {
   note?: string;
 }
 
+interface DocumentItem {
+  id: string;
+  name: string;
+  displayName: string;
+  type: 'flight' | 'hotel' | 'ticket' | 'other';
+  file: File;
+  uploadDate: Date;
+  url: string;
+  filePath?: string;
+}
+
 const JapanAdventureItinerary = () => {
   const [activeTab, setActiveTab] = useState('itinerary');
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
   const [currency, setCurrency] = useState<Currency>('JPY');
+  const [documents, setDocuments] = useState<DocumentItem[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentItem | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
   
+  // Debug useEffect to monitor documents state
+  useEffect(() => {
+    console.log('Documents state changed:', documents.length, documents);
+  }, [documents]);
+
+  // Load existing files from the files directory on startup
+  useEffect(() => {
+    loadExistingFiles();
+  }, []);
+
+  const loadExistingFiles = async () => {
+    try {
+      // Create documents for existing files
+      const existingFiles = [
+        { name: 'MAK PP.pdf', displayName: 'MAK Passport' },
+        { name: 'Ril PP New.pdf', displayName: 'Ril Passport' },
+        { name: 'USJ.pdf', displayName: 'Universal Studios Japan Ticket' },
+        { name: 'HIROSHIMA_HOTEL.pdf', displayName: 'Hiroshima Hotel Booking' },
+        { name: 'OSAKA_AIRBNB.pdf', displayName: 'Osaka Airbnb Reservation' },
+        { name: 'TOKYO_AIRBNB.pdf', displayName: 'Tokyo Airbnb Reservation' },
+        { name: 'Check-in Guide Tokyo.pdf', displayName: 'Tokyo Check-in Guide' },
+        { name: 'Tokyo-Shinosakabullettrain.pdf', displayName: 'Tokyo-Shin-Osaka Bullet Train' },
+        { name: 'tokyo-shinosaka.pdf', displayName: 'Tokyo-Shin-Osaka Train Ticket' },
+        { name: 'tokyo-shinosaka01.pdf', displayName: 'Tokyo-Shin-Osaka Train Details' },
+        { name: 'AONIYOSHI-Limited express ticket.png', displayName: 'AONIYOSHI Limited Express Ticket' }
+      ];
+
+      const existingDocs: DocumentItem[] = existingFiles.map(file => ({
+        id: 'existing-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+        name: file.name,
+        displayName: file.displayName,
+        type: getDocumentType(file.name),
+        file: new File([''], file.name, { 
+          type: file.name.toLowerCase().includes('.png') ? 'image/png' : 'application/pdf' 
+        }),
+        uploadDate: new Date(),
+        url: `files/${file.name}`,
+        filePath: `files/${file.name}`
+      }));
+
+      setDocuments(existingDocs);
+      console.log('Loaded existing files:', existingDocs.length);
+    } catch (error) {
+      console.error('Error loading existing files:', error);
+    }
+  };
 
   const paymentStatus = {
     paid: {
@@ -96,6 +159,141 @@ const JapanAdventureItinerary = () => {
     const encodedTo = encodeURIComponent(toLocation);
     const url = `https://www.google.com/maps/dir/${encodedFrom}/${encodedTo}`;
     window.open(url, '_blank');
+  };
+
+  const handleFileUpload = async (files: FileList | File[]) => {
+    if (isUploading) return; // Prevent multiple uploads
+    
+    const fileArray = Array.from(files);
+    const validFiles = fileArray.filter(file => 
+      file.type === 'application/pdf' || 
+      file.type.startsWith('image/')
+    );
+    
+    if (validFiles.length === 0) {
+      alert('Please select PDF or image files only.');
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    try {
+      const newDocs: DocumentItem[] = [];
+      
+      for (const file of validFiles) {
+        // Use original filename for simplicity in this demo
+        const fileName = file.name;
+        const newDoc: DocumentItem = {
+          id: 'upload-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+          name: file.name,
+          displayName: file.name.replace(/\.(pdf|png|jpg|jpeg)$/i, ''),
+          type: getDocumentType(file.name),
+          file: file,
+          uploadDate: new Date(),
+          url: URL.createObjectURL(file),
+          filePath: `files/${fileName}`
+        };
+        
+        newDocs.push(newDoc);
+        
+        // In a real app, you would save the file to the server here
+        // For now, we'll just simulate saving to the files directory
+        console.log(`Would save file to: files/${fileName}`);
+      }
+      
+      // Update state by adding to existing documents
+      setDocuments(prev => {
+        const updated = [...prev, ...newDocs];
+        console.log('Updated documents:', updated.length); // Debug log
+        return updated;
+      });
+      
+      console.log(`Successfully added ${newDocs.length} new documents to the list`);
+    } catch (error) {
+      console.error('Error processing uploaded files:', error);
+      alert('Error processing files. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const getDocumentType = (filename: string): DocumentItem['type'] => {
+    const lower = filename.toLowerCase();
+    if (lower.includes('flight') || lower.includes('ticket') || lower.includes('boarding')) return 'flight';
+    if (lower.includes('hotel') || lower.includes('booking') || lower.includes('reservation')) return 'hotel';
+    if (lower.includes('ticket') || lower.includes('pass') || lower.includes('admission')) return 'ticket';
+    return 'other';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const files = e.dataTransfer.files;
+    await handleFileUpload(files);
+  };
+
+  const deleteDocument = (id: string) => {
+    const doc = documents.find(d => d.id === id);
+    if (doc) {
+      URL.revokeObjectURL(doc.url);
+      setDocuments(prev => prev.filter(d => d.id !== id));
+      if (selectedDocument?.id === id) {
+        setSelectedDocument(null);
+      }
+    }
+  };
+
+  const downloadDocument = (doc: DocumentItem) => {
+    const link = document.createElement('a');
+    link.href = doc.url;
+    link.download = doc.name;
+    link.click();
+  };
+
+  const getDocumentIcon = (type: DocumentItem['type']) => {
+    switch (type) {
+      case 'flight': return '✈️';
+      case 'hotel': return '🏨';
+      case 'ticket': return '🎫';
+      default: return '📄';
+    }
+  };
+
+  const getDocumentColor = (type: DocumentItem['type']) => {
+    switch (type) {
+      case 'flight': return 'from-blue-500 to-blue-600';
+      case 'hotel': return 'from-emerald-500 to-emerald-600';
+      case 'ticket': return 'from-purple-500 to-purple-600';
+      default: return 'from-gray-500 to-gray-600';
+    }
+  };
+
+  const startEditing = (doc: DocumentItem) => {
+    setEditingId(doc.id);
+    setEditingName(doc.displayName);
+  };
+
+  const saveEdit = (docId: string) => {
+    setDocuments(prev => prev.map(doc => 
+      doc.id === docId ? { ...doc, displayName: editingName } : doc
+    ));
+    setEditingId(null);
+    setEditingName('');
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditingName('');
   };
 
   const itineraryData = [
@@ -942,11 +1140,12 @@ const JapanAdventureItinerary = () => {
           
           {/* Modern Navigation */}
           <div className="px-2 flex justify-center">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-1.5 border border-white/20 shadow-xl w-full max-w-md grid grid-cols-3 gap-1 sm:flex sm:flex-row sm:gap-2">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-1.5 border border-white/20 shadow-xl w-full max-w-3xl flex flex-wrap justify-center gap-1 sm:gap-2">
               {[
                 { id: 'itinerary', icon: Calendar, label: 'Itinerary', color: 'from-blue-500 to-blue-600' },
                 { id: 'journey', icon: MapPin, label: 'Journey', color: 'from-emerald-500 to-emerald-600' },
-                { id: 'budget', icon: Globe, label: 'Budget', color: 'from-purple-500 to-purple-600' }
+                { id: 'budget', icon: Globe, label: 'Budget', color: 'from-purple-500 to-purple-600' },
+                { id: 'documents', icon: FileText, label: 'Documents', color: 'from-orange-500 to-orange-600' }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -1407,7 +1606,253 @@ const JapanAdventureItinerary = () => {
           </div>
         )}
 
-        {/* Docs Tab removed */}
+        {/* Documents Tab */}
+        {activeTab === 'documents' && (
+          <div className="space-y-6 sm:space-y-8">
+            <div className="text-center mb-6 sm:mb-8 px-4">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Travel Documents</h3>
+              <p className="text-gray-600 text-sm sm:text-base">Store and view your travel documents - flight tickets, hotel bookings, and more</p>
+              <div className="mt-3 flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm text-gray-500">
+                <span>📁 Files stored in: <code className="bg-gray-100 px-2 py-1 rounded text-xs">files/</code></span>
+                <span>📊 Total documents: <strong className="text-gray-700">{documents.length}</strong></span>
+              </div>
+            </div>
+
+            {/* Upload Section */}
+            <div 
+              className={`bg-white rounded-xl p-6 sm:p-8 shadow-lg border-2 border-dashed transition-all duration-300 ${
+                isDragOver ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-orange-400'
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <div className="text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+                    <Upload className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">Upload Travel Documents</h4>
+                <p className="text-gray-600 mb-4">Drag and drop PDF files or images here or click to browse</p>
+                <input
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  multiple
+                  className="hidden"
+                  id="file-upload"
+                  onChange={async (e) => {
+                    if (e.target.files) {
+                      await handleFileUpload(e.target.files);
+                      e.target.value = ''; // Clear the input after upload
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="file-upload"
+                  className={`inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                    isUploading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <FileText className="w-5 h-5 mr-2" />
+                  {isUploading ? 'Uploading...' : 'Choose Files'}
+                </label>
+              </div>
+            </div>
+
+            {/* Documents Grid */}
+            {documents.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {documents.map((doc) => (
+                  <div key={doc.id} className="bg-white rounded-xl p-4 sm:p-5 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 group">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className={`w-12 h-12 bg-gradient-to-br ${getDocumentColor(doc.type)} rounded-xl flex items-center justify-center text-white text-xl shadow-lg`}>
+                        {getDocumentIcon(doc.type)}
+                      </div>
+                      <div className="flex space-x-1">
+                        <button
+                          onClick={() => setSelectedDocument(doc)}
+                          className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
+                          title="View Document"
+                        >
+                          <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </button>
+                        <button
+                          onClick={() => startEditing(doc)}
+                          className="p-1.5 sm:p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors duration-200"
+                          title="Edit Name"
+                        >
+                          <Edit3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </button>
+                        <button
+                          onClick={() => downloadDocument(doc)}
+                          className="p-1.5 sm:p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
+                          title="Download"
+                        >
+                          <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteDocument(doc.id)}
+                          className="p-1.5 sm:p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {editingId === doc.id ? (
+                      <div className="mb-3">
+                        <input
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') saveEdit(doc.id);
+                            if (e.key === 'Escape') cancelEdit();
+                          }}
+                        />
+                        <div className="flex space-x-1 mt-1">
+                          <button
+                            onClick={() => saveEdit(doc.id)}
+                            className="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors"
+                          >
+                            <Check className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600 transition-colors"
+                          >
+                            <XIcon className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <h4 className="font-bold text-gray-900 mb-2 truncate" title={doc.displayName}>
+                        {doc.displayName}
+                      </h4>
+                    )}
+                    <p className="text-xs text-gray-500 mb-2" title={doc.name}>
+                      File: {doc.name}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        doc.type === 'flight' ? 'bg-blue-100 text-blue-700' :
+                        doc.type === 'hotel' ? 'bg-emerald-100 text-emerald-700' :
+                        doc.type === 'ticket' ? 'bg-purple-100 text-purple-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {doc.type.charAt(0).toUpperCase() + doc.type.slice(1)}
+                      </span>
+                      <span className="text-xs">
+                        {doc.uploadDate.toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {documents.length === 0 && (
+              <div className="text-center py-12">
+                <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                  <FileText className="w-12 h-12 text-gray-400" />
+                </div>
+                <h4 className="text-lg font-medium text-gray-900 mb-2">No documents uploaded yet</h4>
+                <p className="text-gray-600">Upload your travel documents to keep them organized and easily accessible</p>
+              </div>
+            )}
+
+            {/* PDF Viewer Modal */}
+            {selectedDocument && (
+              <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-2 sm:p-4">
+                <div className="bg-white rounded-lg sm:rounded-xl w-full h-full sm:max-w-7xl sm:h-[90vh] flex flex-col shadow-2xl">
+                  <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg sm:rounded-t-xl">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">{selectedDocument.displayName}</h3>
+                      <p className="text-xs sm:text-sm text-gray-500 truncate">{selectedDocument.name}</p>
+                    </div>
+                    <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
+                      <button
+                        onClick={() => downloadDocument(selectedDocument)}
+                        className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors duration-200"
+                        title="Download"
+                      >
+                        <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                      <button
+                        onClick={() => setSelectedDocument(null)}
+                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+                      >
+                        <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-hidden bg-gray-100">
+                    {/* Mobile-friendly document preview */}
+                    <div className="w-full h-full sm:hidden flex flex-col items-center justify-center p-6 text-center">
+                      <div className={`w-24 h-24 bg-gradient-to-br ${getDocumentColor(selectedDocument.type)} rounded-2xl flex items-center justify-center text-white text-4xl shadow-lg mb-4`}>
+                        {getDocumentIcon(selectedDocument.type)}
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{selectedDocument.displayName}</h3>
+                      <p className="text-sm text-gray-600 mb-4">{selectedDocument.name}</p>
+                      <div className="space-y-2 w-full max-w-xs">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Type:</span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            selectedDocument.type === 'flight' ? 'bg-blue-100 text-blue-700' :
+                            selectedDocument.type === 'hotel' ? 'bg-emerald-100 text-emerald-700' :
+                            selectedDocument.type === 'ticket' ? 'bg-purple-100 text-purple-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {selectedDocument.type.charAt(0).toUpperCase() + selectedDocument.type.slice(1)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Added:</span>
+                          <span className="text-gray-700">{selectedDocument.uploadDate.toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-6">
+                        PDFs are best viewed in a new tab on mobile devices
+                      </p>
+                    </div>
+                    
+                    {/* Desktop PDF display */}
+                    <div className="hidden sm:block w-full h-full">
+                      <iframe
+                        src={`${selectedDocument.url}#toolbar=1&navpanes=1&scrollbar=1`}
+                        className="w-full h-full border-0"
+                        title={selectedDocument.displayName}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Mobile action buttons */}
+                  <div className="sm:hidden p-4 bg-gray-50 border-t border-gray-200 space-y-3">
+                    <button
+                      onClick={() => window.open(selectedDocument.url, '_blank')}
+                      className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>Open PDF in New Tab</span>
+                    </button>
+                    <button
+                      onClick={() => downloadDocument(selectedDocument)}
+                      className="w-full py-3 px-4 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Download PDF</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
     </div>

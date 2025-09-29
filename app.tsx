@@ -37,10 +37,6 @@ const JapanAdventureItinerary = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   
-  // Debug useEffect to monitor documents state
-  useEffect(() => {
-    console.log('Documents state changed:', documents.length, documents);
-  }, [documents]);
 
   // Load existing files from the files directory on startup
   useEffect(() => {
@@ -81,34 +77,53 @@ const JapanAdventureItinerary = () => {
       }));
 
       setDocuments(existingDocs);
-      console.log('Loaded existing files:', existingDocs.length);
     } catch (error) {
       console.error('Error loading existing files:', error);
     }
   };
 
   const paymentStatus = {
+    customerPayment: {
+      total: { jpy: "¥352,349", inr: "₹210,000" },
+      date: "Received",
+      status: "Confirmed"
+    },
     paid: {
-      percentage: 95,
-      total: { jpy: "¥365,625", inr: "₹217,672" },
-      items: [
-        { name: "Tokyo Accommodation (Airbnb)", amount: { jpy: "¥66,000", inr: "₹39,336" }, date: "Paid" },
-        { name: "Osaka Hotel (2 nights)", amount: { jpy: "¥46,000", inr: "₹27,416" }, date: "Paid" },
-        { name: "Hiroshima Hotel (1 night)", amount: { jpy: "¥23,000", inr: "₹13,708" }, date: "Paid" },
-        { name: "Shinkansen NOZOMI 11 (Tokyo-Osaka)", amount: { jpy: "¥42,960", inr: "₹25,604" }, date: "Paid - Reservation #2000" },
-        { name: "Domestic Flight (Hiroshima-Tokyo)", amount: { jpy: "¥46,000", inr: "₹27,416" }, date: "Paid" },
-        { name: "Mount Fuji Private Tour", amount: { jpy: "¥75,000", inr: "₹44,700" }, date: "Paid" },
-        { name: "Universal Studios Japan Studio Pass", amount: { jpy: "¥33,000", inr: "₹19,668" }, date: "Paid - Sept 29, 2025" },
-        { name: "Limited Express AONIYOSHI (Osaka-Kyoto)", amount: { jpy: "¥3,000", inr: "₹1,788" }, date: "Paid - Sept 30, 2025" },
-        { name: "Private Car Transfer (Airport-Tokyo)", amount: { jpy: "¥16,000", inr: "₹9,536" }, date: "Paid - Sept 25, 2025" },
-        { name: "Tokyo Disneyland Tickets", amount: { jpy: "¥34,000", inr: "₹20,264" }, date: "Paid - Sept 27, 2025" }
+      accommodation: [
+        { name: "Tokyo Accommodation (Airbnb) - Initial", amount: { jpy: "¥66,000", inr: "₹39,336" }, date: "Paid" },
+        { name: "Osaka Accommodation (Airbnb)", amount: { jpy: "¥46,000", inr: "₹27,416" }, date: "Paid" },
+        { name: "Hiroshima Hotel", amount: { jpy: "¥23,000", inr: "₹13,708" }, date: "Paid" },
+        { name: "Tokyo Accommodation (Airbnb) - Additional", amount: { jpy: "¥35,500", inr: "₹21,158" }, date: "Paid" }
+      ],
+      transportation: [
+        { name: "Bullet Train (Tokyo-Osaka)", amount: { jpy: "¥42,960", inr: "₹25,604" }, date: "Paid" },
+        { name: "Kintetsu Limited Express", amount: { jpy: "¥1,830", inr: "₹1,091" }, date: "Paid" },
+        { name: "Kintetsu Limited Express (2x)", amount: { jpy: "¥2,600", inr: "₹1,550" }, date: "Paid" },
+        { name: "Airport to Tokyo Transfer", amount: { jpy: "¥20,000", inr: "₹11,920" }, date: "Paid" },
+        { name: "Mount Fuji Car (inc. Gotemba + tolls)", amount: { jpy: "¥85,000", inr: "₹50,660" }, date: "Paid" },
+        { name: "Flight Hiroshima-Tokyo", amount: { jpy: "¥46,000", inr: "₹27,416" }, date: "Paid" }
+      ],
+      activities: [
+        { name: "Tokyo Disneyland", amount: { jpy: "¥34,000", inr: "₹20,264" }, date: "Paid" },
+        { name: "Universal Studios Japan", amount: { jpy: "¥33,500", inr: "₹19,966" }, date: "Paid" },
+        { name: "Tokyo Skytree", amount: { jpy: "¥8,600", inr: "₹5,126" }, date: "Paid" },
+        { name: "Mount Fuji Ropeway", amount: { jpy: "¥6,800", inr: "₹4,053" }, date: "Paid" },
+        { name: "Mount Fuji Pleasure Boat", amount: { jpy: "¥3,600", inr: "₹2,146" }, date: "Paid" }
+      ],
+      goods: [
+        { name: "Key Chain", amount: { jpy: "¥1,100", inr: "₹656" }, date: "Paid" },
+        { name: "7-Eleven Purchase", amount: { jpy: "¥1,303", inr: "₹777" }, date: "Paid" },
+        { name: "Nike Shoes", amount: { jpy: "¥16,048", inr: "₹9,565" }, date: "Paid" },
+        { name: "Daiso Hair Care", amount: { jpy: "¥37,210", inr: "₹22,177" }, date: "Paid" },
+        { name: "Seisuke Knife", amount: { jpy: "¥13,600", inr: "₹8,106" }, date: "Paid" },
+        { name: "Taxi", amount: { jpy: "¥1,300", inr: "₹775" }, date: "Paid" },
+        { name: "Amazon Order", amount: { jpy: "¥15,494", inr: "₹9,234" }, date: "Paid" },
+        { name: "Lindt Ice Cream + Chocolate (1 set)", amount: { jpy: "¥4,990", inr: "₹2,974" }, date: "Paid" }
       ]
     },
     unpaid: {
-      total: { jpy: "¥17,634", inr: "₹10,510" },
       items: [
-        { name: "teamLab Planets Tickets", amount: { jpy: "¥9,600", inr: "₹5,722" }, date: "Need to book" },
-        { name: "Additional Transportation", amount: { jpy: "¥8,034", inr: "₹4,788" }, date: "Pay on arrival" }
+        { name: "teamLab Planets", amount: { jpy: "¥12,600", inr: "₹7,510" }, date: "Not yet purchased" }
       ]
     }
   };
@@ -118,29 +133,48 @@ const JapanAdventureItinerary = () => {
   const formatJPY = (amount: number): string => `¥${Math.round(amount).toLocaleString()}`;
 
   const computed = useMemo(() => {
-    const paidSumJPY = paymentStatus.paid.items.reduce((sum: number, item: any) => sum + parseJPY(item.amount.jpy), 0);
+    // Calculate totals for each category
+    const accommodationTotal = paymentStatus.paid.accommodation.reduce((sum: number, item: any) => sum + parseJPY(item.amount.jpy), 0);
+    const transportationTotal = paymentStatus.paid.transportation.reduce((sum: number, item: any) => sum + parseJPY(item.amount.jpy), 0);
+    const activitiesTotal = paymentStatus.paid.activities.reduce((sum: number, item: any) => sum + parseJPY(item.amount.jpy), 0);
+    const goodsTotal = paymentStatus.paid.goods.reduce((sum: number, item: any) => sum + parseJPY(item.amount.jpy), 0);
     const unpaidSumJPY = paymentStatus.unpaid.items.reduce((sum: number, item: any) => sum + parseJPY(item.amount.jpy), 0);
-    // Add ¥2,000 per accommodation (3 accommodations in itinerary)
-    const accommodationCount = 3; // avoid referencing itineraryData before declaration
-    const accommodationFeeJPY = 2000 * accommodationCount;
-    const totalJPY = paidSumJPY + unpaidSumJPY + accommodationFeeJPY;
+    
+    const paidSumJPY = accommodationTotal + transportationTotal + activitiesTotal + goodsTotal;
+    const totalJPY = paidSumJPY + unpaidSumJPY;
 
     const peopleCount = 3;
     const daysCount = 8;
 
     const toINR = (j: number) => `₹${Math.round(j * 0.596).toLocaleString()}`;
 
+    // Calculate remaining balance
+    const customerPaidJPY = parseJPY(paymentStatus.customerPayment.total.jpy);
+    const remainingBalanceJPY = totalJPY - customerPaidJPY;
+
     return {
       paidSumJPY,
       unpaidSumJPY,
       totalJPY,
-      progressPct: totalJPY > 0 ? Math.round((paidSumJPY / totalJPY) * 100) : 0,
+      accommodationTotal,
+      transportationTotal,
+      activitiesTotal,
+      goodsTotal,
+      customerPaidJPY,
+      remainingBalanceJPY,
+      progressPct: totalJPY > 0 ? Math.round((customerPaidJPY / totalJPY) * 100) : 0,
       display: {
         total: { jpy: formatJPY(totalJPY), inr: toINR(totalJPY) },
-        perPerson: { jpy: formatJPY(totalJPY / peopleCount), inr: toINR(totalJPY / peopleCount) },
-        perDay: { jpy: formatJPY(totalJPY / daysCount), inr: toINR(totalJPY / daysCount) },
         paid: { jpy: formatJPY(paidSumJPY), inr: toINR(paidSumJPY) },
         unpaid: { jpy: formatJPY(unpaidSumJPY), inr: toINR(unpaidSumJPY) },
+        accommodation: { jpy: formatJPY(accommodationTotal), inr: toINR(accommodationTotal) },
+        transportation: { jpy: formatJPY(transportationTotal), inr: toINR(transportationTotal) },
+        activities: { jpy: formatJPY(activitiesTotal), inr: toINR(activitiesTotal) },
+        goods: { jpy: formatJPY(goodsTotal), inr: toINR(goodsTotal) },
+        customerPaid: { jpy: formatJPY(customerPaidJPY), inr: toINR(customerPaidJPY) },
+        remainingBalance: { jpy: formatJPY(remainingBalanceJPY), inr: toINR(remainingBalanceJPY) },
+        perPerson: { jpy: formatJPY(totalJPY / peopleCount), inr: toINR(totalJPY / peopleCount) },
+        perDay: { jpy: formatJPY(totalJPY / daysCount), inr: toINR(totalJPY / daysCount) }
       },
     };
   }, [paymentStatus, currency]);
@@ -1454,22 +1488,119 @@ const JapanAdventureItinerary = () => {
                 </div>
               </div>
 
-              {/* Paid Items */}
+              {/* Customer Payment */}
+              <div className="mb-4 sm:mb-6 bg-green-50 border-2 border-green-300 rounded-lg p-3 sm:p-4">
+                <div className="flex items-center space-x-2 mb-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <h3 className="font-bold text-green-800 text-base sm:text-lg">Customer Payment Received</h3>
+                </div>
+                <div className="bg-white border border-green-200 rounded-lg p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
+                    <div className="flex-1">
+                      <p className="font-semibold text-green-800 text-sm sm:text-base">Total Payment Received</p>
+                      <p className="text-xs text-green-600 mt-0.5">{paymentStatus.customerPayment.date} - {paymentStatus.customerPayment.status}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-green-700 text-lg sm:text-xl">
+                        {currency === 'JPY' ? paymentStatus.customerPayment.total.jpy : paymentStatus.customerPayment.total.inr}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
+                    <div className="flex-1">
+                      <p className="font-medium text-blue-800 text-sm sm:text-base">Remaining Balance</p>
+                      <p className="text-xs text-blue-600 mt-0.5">Due on completion</p>
+                    </div>
+                    <div className="font-bold text-blue-700 text-base sm:text-lg">
+                      {currency === 'JPY' ? computed.display.remainingBalance.jpy : computed.display.remainingBalance.inr}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Paid Items by Category */}
               <details className="mb-4 sm:mb-6" open>
                 <summary className="cursor-pointer select-none text-sm sm:text-md font-bold text-slate-700 mb-2 sm:mb-3 flex items-center space-x-2">
                   <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-slate-500 rounded-full"></span>
-                  <span>Paid Items</span>
+                  <span>Paid Expenses by Category</span>
                 </summary>
-                <div className="space-y-2 sm:space-y-3">
-                  {paymentStatus.paid.items.map((item: any, index: number) => (
-                    <div key={index} className="bg-white border border-slate-200 rounded-lg p-2.5 sm:p-3 flex flex-col sm:flex-row sm:justify-between sm:items-center shadow-sm space-y-1 sm:space-y-0">
-                      <div className="flex-1">
-                        <p className="font-medium text-slate-800 text-sm sm:text-base leading-tight">{item.name}</p>
-                        <p className="text-xs text-slate-600 mt-0.5">{item.date}</p>
+                
+                {/* Accommodation */}
+                <div className="mb-4">
+                  <h4 className="font-semibold text-slate-600 mb-2 flex items-center">
+                    <Home className="w-4 h-4 mr-2" />
+                    Accommodation ({currency === 'JPY' ? computed.display.accommodation.jpy : computed.display.accommodation.inr})
+                  </h4>
+                  <div className="space-y-2 pl-6">
+                    {paymentStatus.paid.accommodation.map((item: any, index: number) => (
+                      <div key={index} className="bg-white border border-slate-200 rounded-lg p-2.5 sm:p-3 flex flex-col sm:flex-row sm:justify-between sm:items-center shadow-sm space-y-1 sm:space-y-0">
+                        <div className="flex-1">
+                          <p className="font-medium text-slate-800 text-sm sm:text-base leading-tight">{item.name}</p>
+                          <p className="text-xs text-slate-600 mt-0.5">{item.date}</p>
+                        </div>
+                        <span className="font-bold text-slate-700 text-sm sm:text-base self-start sm:self-center">{item.amount[currency.toLowerCase() as keyof typeof item.amount]}</span>
                       </div>
-                      <span className="font-bold text-slate-700 text-sm sm:text-base self-start sm:self-center">{item.amount[currency.toLowerCase() as keyof typeof item.amount]}</span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+
+                {/* Transportation */}
+                <div className="mb-4">
+                  <h4 className="font-semibold text-slate-600 mb-2 flex items-center">
+                    <Train className="w-4 h-4 mr-2" />
+                    Transportation ({currency === 'JPY' ? computed.display.transportation.jpy : computed.display.transportation.inr})
+                  </h4>
+                  <div className="space-y-2 pl-6">
+                    {paymentStatus.paid.transportation.map((item: any, index: number) => (
+                      <div key={index} className="bg-white border border-slate-200 rounded-lg p-2.5 sm:p-3 flex flex-col sm:flex-row sm:justify-between sm:items-center shadow-sm space-y-1 sm:space-y-0">
+                        <div className="flex-1">
+                          <p className="font-medium text-slate-800 text-sm sm:text-base leading-tight">{item.name}</p>
+                          <p className="text-xs text-slate-600 mt-0.5">{item.date}</p>
+                        </div>
+                        <span className="font-bold text-slate-700 text-sm sm:text-base self-start sm:self-center">{item.amount[currency.toLowerCase() as keyof typeof item.amount]}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Activities */}
+                <div className="mb-4">
+                  <h4 className="font-semibold text-slate-600 mb-2 flex items-center">
+                    <Camera className="w-4 h-4 mr-2" />
+                    Activities ({currency === 'JPY' ? computed.display.activities.jpy : computed.display.activities.inr})
+                  </h4>
+                  <div className="space-y-2 pl-6">
+                    {paymentStatus.paid.activities.map((item: any, index: number) => (
+                      <div key={index} className="bg-white border border-slate-200 rounded-lg p-2.5 sm:p-3 flex flex-col sm:flex-row sm:justify-between sm:items-center shadow-sm space-y-1 sm:space-y-0">
+                        <div className="flex-1">
+                          <p className="font-medium text-slate-800 text-sm sm:text-base leading-tight">{item.name}</p>
+                          <p className="text-xs text-slate-600 mt-0.5">{item.date}</p>
+                        </div>
+                        <span className="font-bold text-slate-700 text-sm sm:text-base self-start sm:self-center">{item.amount[currency.toLowerCase() as keyof typeof item.amount]}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Goods & Shopping */}
+                <div className="mb-4">
+                  <h4 className="font-semibold text-slate-600 mb-2 flex items-center">
+                    <Star className="w-4 h-4 mr-2" />
+                    Goods & Shopping ({currency === 'JPY' ? computed.display.goods.jpy : computed.display.goods.inr})
+                  </h4>
+                  <div className="space-y-2 pl-6">
+                    {paymentStatus.paid.goods.map((item: any, index: number) => (
+                      <div key={index} className="bg-white border border-slate-200 rounded-lg p-2.5 sm:p-3 flex flex-col sm:flex-row sm:justify-between sm:items-center shadow-sm space-y-1 sm:space-y-0">
+                        <div className="flex-1">
+                          <p className="font-medium text-slate-800 text-sm sm:text-base leading-tight">{item.name}</p>
+                          <p className="text-xs text-slate-600 mt-0.5">{item.date}</p>
+                        </div>
+                        <span className="font-bold text-slate-700 text-sm sm:text-base self-start sm:self-center">{item.amount[currency.toLowerCase() as keyof typeof item.amount]}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </details>
 

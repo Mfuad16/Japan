@@ -1,3 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f8fafc;
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, #4F46E5, #7C3AED);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-border {
+  background: linear-gradient(90deg, #EC4899, #F59E0B);
+  padding: 2px;
+  border-radius: 1rem;
+}
+
+.gradient-border-content {
+  background: white;
+  border-radius: calc(1rem - 2px);
+}
